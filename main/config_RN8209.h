@@ -46,6 +46,10 @@ extern void RN8209toMQTT();
 #ifndef TimeBetweenReadingRN8209
 #  define TimeBetweenReadingRN8209 500 // time between 2 RN8209 readings in ms
 #endif
+
+#ifndef TimeOutWDTRN8209
+#  define TimeOutWDTRN8209 5 // time out if RN8209 task is stuck in seconds ( should be more than TimeBetweenReadingRN8209/1000)
+#endif
 #ifndef TimeBetweenPublishingRN8209
 #  define TimeBetweenPublishingRN8209 10000 // time between 2 RN8209 publishing in ms
 #endif

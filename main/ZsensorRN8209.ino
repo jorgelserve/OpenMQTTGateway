@@ -26,6 +26,8 @@
 */
 #ifdef ZsensorRN8209
 
+#  include <esp_task_wdt.h>
+
 #  include "ArduinoJson.h"
 #  include "driver/uart.h"
 #  include "rn8209_flash.h"
@@ -36,6 +38,8 @@ extern "C" bool init_8209c_interface();
 float voltage = 0;
 float current = 0;
 float power = 0;
+
+TaskHandle_t rn8209TaskHandle = nullptr;
 
 unsigned long PublishingTimerRN8209 = 0;
 
@@ -86,6 +90,7 @@ void rn8209_loop(void* mode) {
       previousPower = power;
       if (data) pub(subjectRN8209toMQTT, data);
     }
+    esp_task_wdt_reset();
     delay(TimeBetweenReadingRN8209);
   }
 }
@@ -97,7 +102,9 @@ void setupRN8209() {
   cal.EC = RN8209_EC;
   set_user_param(cal);
   init_8209c_interface();
-  xTaskCreate(rn8209_loop, "rn8209_loop", RN8209_TASK_STACK_SIZE, NULL, 10, NULL);
+  esp_task_wdt_init(TimeOutWDTRN8209, true);
+  xTaskCreate(rn8209_loop, "rn8209_loop", RN8209_TASK_STACK_SIZE, NULL, 10, &rn8209TaskHandle);
+  esp_task_wdt_add(rn8209TaskHandle);
   Log.trace(F("ZsensorRN8209 setup done " CR));
 }
 
