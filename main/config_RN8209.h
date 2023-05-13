@@ -57,6 +57,6 @@ extern void RN8209toMQTT();
 #  define PreviousPowerThreshold 0.1 // (percentage) threshold of the previous power that will trigger the publishing of the power value
 #endif
 #ifndef MinPowerThreshold
-#  define MinPowerThreshold 1 // (watt) Minimum power threshold that will trigger the publishing of the power value combined with PreviousPowerThreshold
+#  define MinPowerThreshold 10 // (watt) Minimum power threshold that will trigger the publishing of the power value combined with PreviousPowerThreshold
 #endif
 #endif

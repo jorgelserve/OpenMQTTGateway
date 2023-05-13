@@ -71,15 +71,15 @@ void rn8209_loop(void* mode) {
     StaticJsonDocument<128> doc;
     JsonObject data = doc.to<JsonObject>();
     if (retc == 0) {
-      data["current"] = current;
+      data["current"] = round2(current);
     }
     if (retv == 0) {
       voltage = (float)temp_voltage / 1000.0;
-      data["volt"] = voltage;
+      data["volt"] = round2(voltage);
     }
     if (retp == 0) {
       power = power / 10000.0;
-      data["power"] = power;
+      data["power"] = round2(power);
     }
     unsigned long now = millis();
     if ((now > (PublishingTimerRN8209 + TimeBetweenPublishingRN8209) ||
@@ -103,7 +103,7 @@ void setupRN8209() {
   set_user_param(cal);
   init_8209c_interface();
   esp_task_wdt_init(TimeOutWDTRN8209, true);
-  xTaskCreate(rn8209_loop, "rn8209_loop", RN8209_TASK_STACK_SIZE, NULL, 10, &rn8209TaskHandle);
+  xTaskCreate(rn8209_loop, "rn8209_loop", 6000, NULL, 10, &rn8209TaskHandle);
   esp_task_wdt_add(rn8209TaskHandle);
   Log.trace(F("ZsensorRN8209 setup done " CR));
 }
