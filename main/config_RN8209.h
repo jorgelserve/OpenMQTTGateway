@@ -48,15 +48,15 @@ extern void RN8209toMQTT();
 #endif
 
 #ifndef TimeOutWDTRN8209
-#  define TimeOutWDTRN8209 5 // time out if RN8209 task is stuck in seconds ( should be more than TimeBetweenReadingRN8209/1000)
+#  define TimeOutWDTRN8209 31 // time out if RN8209 task is stuck in seconds ( should be more than TimeBetweenReadingRN8209/1000)
 #endif
 #ifndef TimeBetweenPublishingRN8209
 #  define TimeBetweenPublishingRN8209 10000 // time between 2 RN8209 publishing in ms
 #endif
-#ifndef PreviousPowerThreshold
-#  define PreviousPowerThreshold 0.1 // (percentage) threshold of the previous power that will trigger the publishing of the power value
+#ifndef PreviousCurrentThreshold
+#  define PreviousCurrentThreshold 0.3 // (percentage 30% default) threshold of the previous current that will trigger the publishing of the power value
 #endif
-#ifndef MinPowerThreshold
-#  define MinPowerThreshold 10 // (watt) Minimum power threshold that will trigger the publishing of the power value combined with PreviousPowerThreshold
+#ifndef MinCurrentThreshold
+#  define MinCurrentThreshold 0.1 // (A) Minimum power threshold that will trigger the publishing of the power value combined with PreviousPowerThreshold
 #endif
 #endif

@@ -45,49 +45,52 @@ unsigned long PublishingTimerRN8209 = 0;
 
 void rn8209_loop(void* mode) {
   while (1) {
-    uint32_t temp_voltage = 0;
-    uint8_t retv = rn8209c_read_voltage(&temp_voltage);
     uint8_t ret = rn8209c_read_emu_status();
     uint8_t retc = 1;
     uint8_t retp = 1;
-    static float previousPower = 0;
+    static float previousCurrent = 0;
     if (ret) {
       uint32_t temp_current = 0;
-      uint32_t temp_power = 0;
       retc = rn8209c_read_current(phase_A, &temp_current);
-      retp = rn8209c_read_power(phase_A, &temp_power);
       if (ret == 1) {
         current = temp_current;
-        power = temp_power;
       } else {
         current = (int32_t)temp_current * (-1);
-        power = (int32_t)temp_power * (-1);
       }
       if (retc == 0) {
         current = current / 10000.0;
         overLimitCurrent(current);
       }
     }
-    StaticJsonDocument<128> doc;
-    JsonObject data = doc.to<JsonObject>();
-    if (retc == 0) {
-      data["current"] = round2(current);
-    }
-    if (retv == 0) {
-      voltage = (float)temp_voltage / 1000.0;
-      data["volt"] = round2(voltage);
-    }
-    if (retp == 0) {
-      power = power / 10000.0;
-      data["power"] = round2(power);
-    }
     unsigned long now = millis();
     if ((now > (PublishingTimerRN8209 + TimeBetweenPublishingRN8209) ||
          !PublishingTimerRN8209 ||
-         (abs(power - previousPower) > previousPower * PreviousPowerThreshold) && abs(power - previousPower) > MinPowerThreshold) &&
+         (abs(current - previousCurrent) > previousCurrent * PreviousCurrentThreshold) && abs(power - previousCurrent) > MinCurrentThreshold) &&
         !ProcessLock) {
+      StaticJsonDocument<128> doc;
+      JsonObject data = doc.to<JsonObject>();
+      if (retc == 0) {
+        data["current"] = round2(current);
+      }
+      uint32_t temp_voltage = 0;
+      uint8_t retv = rn8209c_read_voltage(&temp_voltage);
+      uint32_t temp_power = 0;
+      retp = rn8209c_read_power(phase_A, &temp_power);
+      if (retv == 0) {
+        voltage = (float)temp_voltage / 1000.0;
+        data["volt"] = round2(voltage);
+      }
+      if (ret == 1) {
+        power = temp_power;
+      } else {
+        power = (int32_t)temp_power * (-1);
+      }
+      if (retp == 0) {
+        power = power / 10000.0;
+        data["power"] = round2(power);
+      }
       PublishingTimerRN8209 = now;
-      previousPower = power;
+      previousCurrent = current;
       if (data) pub(subjectRN8209toMQTT, data);
     }
     esp_task_wdt_reset();
@@ -103,7 +106,7 @@ void setupRN8209() {
   set_user_param(cal);
   init_8209c_interface();
   esp_task_wdt_init(TimeOutWDTRN8209, true);
-  xTaskCreate(rn8209_loop, "rn8209_loop", 6000, NULL, 10, &rn8209TaskHandle);
+  xTaskCreate(rn8209_loop, "rn8209_loop", 5000, NULL, 10, &rn8209TaskHandle);
   esp_task_wdt_add(rn8209TaskHandle);
   Log.trace(F("ZsensorRN8209 setup done " CR));
 }
